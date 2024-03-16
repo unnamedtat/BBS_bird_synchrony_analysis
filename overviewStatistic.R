@@ -1,48 +1,66 @@
 library(gridExtra)
 library(readr)
 library(stats)
-library(tidyr)
-library(dplyr)
 library(purrr)
+library(Hmisc)
 # source("NUSABird/2023Release_Nor/Script/globalPlots.R")
-source("NUSABird/2023Release_Nor/Script/global.R")
+source("NUSABird/2023Release_Nor/Script/global/global.R")
 
+all_stats<-list()
+corr_stats<-list()
 ##### 对于每个种群的时间序列，计算出每个种群的平均值和标准差#########
-all_stats  <- routes_list %>%
+routes_list %>%
   map2(names(.), function(df, name) {
+    df<-left_join(selected_AOU_number,df,by="AOU")%>%
+        select(AOU,RouteID, Year, SpeciesTotal) # 下面的计算只需要这几列
     # 从名称中提取开始年份和结束年份
     start_year <- as.numeric(substr(name, 1, 4))
     end_year <- as.numeric(substr(name, 6, 9))
     all_years <- start_year:end_year
-
       # 获取唯一的AOU和RouteID组合
       # 首先，建立一个去重的AOU和RouteID组合数据框
    unique_aou_routeid_df <- df %>%
     select(AOU, RouteID) %>%
     distinct()
-
   # 然后，生成完整的Year序列
   complete_df <- unique_aou_routeid_df %>%
     crossing(Year = all_years) %>%
     left_join(df, by = c("AOU", "RouteID", "Year"), suffix = c("", ".y")) %>%
-    mutate(TotalSpecies = coalesce(SpeciesTotal, 0)) %>%
+    mutate(SpeciesTotal = coalesce(SpeciesTotal, 0)) %>%
     select(-ends_with(".y"))
+  #算出所有选中物种在不同的采样点的统计学性质
+  stats <- complete_df %>%
+  group_by(AOU, RouteID) %>%
+    summarise(
+      mean_SpeciesTotal = mean(SpeciesTotal, na.rm = TRUE),
+      sd_SpeciesTotal = sd(SpeciesTotal, na.rm = TRUE),
+      n = n(),
+      .groups = "drop"
+    )
+  all_stats[[name]]<-stats
 
-      stats <- complete_df %>%
-        group_by(AOU, RouteID) %>%
-        summarise(
-          mean_TotalSpecies = mean(TotalSpecies, na.rm = TRUE),
-          sd_TotalSpecies = sd(TotalSpecies, na.rm = TRUE),
-          n = n(),
-          .groups = "drop"
-        )
-      return(stats)
-  })
-
-# all_stats <- all_stats[!sapply(all_stats, is.null)]
+   #按AOU字段分割数据框，分别进行两两皮尔逊指数的计算
+  split_AOU_df <- split(complete_df, complete_df$AOU)
+  AOU_Pearson <-  map(split_AOU_df, function(every_AOU){
+   # 首先将数据展宽,每个RouteID对应10列时间序列
+    cor_mat <- every_AOU %>%
+      pivot_wider(names_from = RouteID, values_from = SpeciesTotal,names_prefix = "RouteID")%>%
+      select(-AOU,-Year)%>%
+      as.matrix()%>%
+      rcorr()
+      return(cor_mat)}
+  )
+    corr_stats[[name]]<-AOU_Pearson
+      })
 
 # 将每个表存入文件
 walk2(all_stats, names(all_stats), ~write.csv(.x, file = file.path(paste(workflow_dir, .y, sep = "/"), "AOU_Stastic.csv"), row.names = FALSE))
+# 对于每个时间段的相关性系数，算出两两之间的距离
+log10_distance<-routes_info_with_id %>%
+  select(RouteID,Longitude,Latitude)
+# 对于矩阵中显著性大于【】的，参与线性拟合计算。
+
+
 
 #############已废弃！对于每个表，统计每年最多的物种数目，并将数量前十五的物种按顺序存入每一列################
 # routes_AOU_list <- sub_dirs %>%

@@ -1,8 +1,8 @@
 library(stats)
 library(purrr)
 library(gridExtra)
-source("NUSABird/2023Release_Nor/Script/globalPlots.R")
-source("NUSABird/2023Release_Nor/Script/global.R")
+source("NUSABird/2023Release_Nor/Script/global/globalPlots.R")
+source("NUSABird/2023Release_Nor/Script/global/global.R")
 
 # ####################### 种群整体动态 #######################
 # 对每个数据框执行分析和绘图操作
@@ -37,7 +37,7 @@ selected_routes_list <- sub_dirs %>%
   Filter(length, .) %>%
   map(~map(.x, read.csv)) %>%
   flatten() %>%
-  map(~left_join(.x, routes_info, by = c("CountryNum","StateNum", "Route")))
+  map(~left_join(.x, routes_info_with_id, by = c("CountryNum","StateNum", "Route")))
 
 all_routes <- read.csv("NUSABird/2023Release_Nor/routes.csv")
 all_routes_sf <- st_as_sf(all_routes, coords = c("Longitude", "Latitude"), crs = 4326)
@@ -74,13 +74,6 @@ plot_latlng <- function(df,name) {
   return(plot)
 }
 
-# # 对selected_routes_list中的每一个二维列表应用绘图函数
-# plot_2 <- selected_routes_list %>%
-#      imap(~ {
-#     df <- .x
-#     names(.y) <- .y # 使用文件夹名作为图形标题
-#     plot_latlng(df, .y)
-#   })
 plot_2 <- selected_routes_list %>%
      map2(names(.), ~plot_latlng(.x, .y))
 

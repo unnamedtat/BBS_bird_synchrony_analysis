@@ -5,6 +5,13 @@ for (i in seq(1988, 2010, by = 2)){
   End_Years <- i+9
   save_path=paste0("NUSABird/2023Release_Nor/Workflow/",as.character(Start_Years),"-",as.character(End_Years),"/")
 dir.create(save_path)
+#为所有路线生成唯一ID
+routes_info <- read.csv("NUSABird/2023Release_Nor/routes.csv")
+routes_info_with_id <- routes_info %>%
+  mutate(RouteID = row_number())
+routes_info_with_id <- write.csv(routes_info_with_id,
+                                 file = paste("NUSABird/2023Release_Nor/Workflow/","route_with_id.csv",sep="/"),
+                                 row.names = FALSE)
 
 name.file <- list.files(states_path, full.names = T, pattern = ".csv")
 

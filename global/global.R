@@ -5,9 +5,7 @@ library(tidyr)
 workflow_dir <- "NUSABird/2023Release_Nor/Workflow"
 sub_dirs <- list.dirs(workflow_dir, recursive = TRUE, full.names = TRUE)
 
-routes_info <- read.csv("NUSABird/2023Release_Nor/routes.csv")
-routes_info_with_id <- routes_info %>%
-  mutate(RouteID = row_number())
+routes_info_with_id <-read.csv(paste("NUSABird/2023Release_Nor/Workflow/","route_with_id.csv",sep="/"))
 
 routes_list <- sub_dirs %>%
   set_names(basename(sub_dirs)) %>%  # 使用文件夹名称作为列表名称
@@ -17,3 +15,4 @@ routes_list <- sub_dirs %>%
   flatten() %>%
     map(~left_join(.x, routes_info_with_id, by = c("CountryNum","StateNum", "Route")))
 
+selected_AOU_number <- read.csv(paste(workflow_dir,"selected_species.csv",sep="/"))["AOU"]
