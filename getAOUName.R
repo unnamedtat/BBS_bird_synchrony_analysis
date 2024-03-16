@@ -42,4 +42,4 @@ colnames(df) <- c("Seq", "AOU", "English_Common_Name")
                   # "ORDER", "Family", "Genus", "Species")
 
 # 最后，我们将这个数据框保存为csv文件
-write.csv(df, "NUSABird/2023Release_Nor/Workflow/NAME.csv", row.names = FALSE)
+write.csv(df, AOU_name, row.names = FALSE)

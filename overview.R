@@ -1,5 +1,4 @@
 library(stats)
-library(purrr)
 library(gridExtra)
 source("NUSABird/2023Release_Nor/Script/global/globalPlots.R")
 source("NUSABird/2023Release_Nor/Script/global/global.R")
@@ -10,11 +9,11 @@ plot1s_list <- routes_list %>%
   map2(names(.), function(x, name) {
       total_species <- x %>%
         group_by(Year) %>%
-        summarise(Total = sum(SpeciesTotal))
+        summarise(SpeciesTotal = sum(SpeciesTotal))
       min_year <- min(total_species$Year)
       max_year <- max(total_species$Year)
 
-      total_plot <- ggplot(total_species, aes(x = Year, y = Total)) +
+      total_plot <- ggplot(total_species, aes(x = Year, y = SpeciesTotal)) +
         geom_line() +
         geom_point(colour = "gray", size = 2, alpha = 0.5, shape = 19) +
         # geom_text(aes(label = Total), vjust = -1)+
@@ -29,18 +28,16 @@ plot1s_list <- routes_list %>%
   })
 # 将所有图形排列在一张图上
 plot1_grid <- do.call(grid.arrange, c(plot1s_list, ncol = 2)) %>%
-  ggsave(paste0(workflow_dir,"/pics/","时间窗口.png"),., width = 12, height = 15, units = "in", dpi = 300)
+  ggsave(timeline_pic_path,., width = 12, height = 15, units = "in", dpi = 300)
 ####################### 查看每个时间窗的路线分布 #######################
 selected_routes_list <- sub_dirs %>%
   set_names(basename(sub_dirs)) %>%
   map(~list.files(., pattern = "selected_routes.csv", full.names = TRUE)) %>%
-  Filter(length, .) %>%
   map(~map(.x, read.csv)) %>%
   flatten() %>%
   map(~left_join(.x, routes_info_with_id, by = c("CountryNum","StateNum", "Route")))
 
-all_routes <- read.csv("NUSABird/2023Release_Nor/routes.csv")
-all_routes_sf <- st_as_sf(all_routes, coords = c("Longitude", "Latitude"), crs = 4326)
+all_routes_sf <- st_as_sf(routes_info_with_id, coords = c("Longitude", "Latitude"), crs = 4326)
 df_bbox <- st_bbox(all_routes_sf)
 #图形边界框，避免图形边界被遮挡
 buffer<-1
@@ -87,7 +84,7 @@ plot_2  %>%
 library(openxlsx)
 top_16_path <- paste0(workflow_dir,"/top_16.xlsx")
 top_16_workbook <- createWorkbook()
-AOU_name <- read.csv("NUSABird/2023Release_Nor/Workflow/name.csv")
+AOU_name <- read.csv(AOU_name)
 # 对每个数据框执行分析和绘图操作
 plot3s_list <- routes_list %>%
   map2(names(.), function(x, name) {
@@ -103,8 +100,8 @@ plot3s_list <- routes_list %>%
       AOU_count_plot <- ggplot(AOU_count, aes(x = English_Common_Name, y = Total, fill = English_Common_Name )) +
         geom_bar(stat = "identity", position = "dodge") +
         scale_y_continuous(labels = fancy_scientific)+
-        ggtitle(paste0(name, " 年数量前16的物种分布")) +
-        labs(x = "", y = "",fill="物种名称") +
+        ggtitle(paste0(name, "年数量前16的物种")) +
+        labs(x = "", y = "",fill="物种") +
         theme_bar
     
       return(AOU_count_plot)
