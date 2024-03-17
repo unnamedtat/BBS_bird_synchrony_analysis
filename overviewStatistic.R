@@ -23,6 +23,7 @@ routes_list %>%
     select(AOU, RouteID) %>%
     distinct()
   # 然后，生成完整的Year序列
+    #############这里需要更改，应该是插值？
   complete_df <- unique_aou_routeid_df %>%
     crossing(Year = all_years) %>%
     left_join(df, by = c("AOU", "RouteID", "Year"), suffix = c("", ".y")) %>%

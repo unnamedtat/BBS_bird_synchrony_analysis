@@ -18,10 +18,10 @@ for(file in name.file){
 weather_data<-read.csv(weather_path)
 
 # 遍历并生成每个窗口的data
-for (i in seq(begin, end-9, by = step)){
-  Start_Years <- i
-  End_Years <- i+length-1
-  save_path=paste(workflow_dir,paste(as.character(Start_Years),as.character(End_Years),sep="-"),sep="/")
+for (i in seq(begin, end-length+1, by = step)){
+  Start_Year <- i
+  End_Year <- i+length-1
+  save_path=paste(workflow_dir, paste(as.character(Start_Year), as.character(End_Year), sep="-"), sep="/")
   dir.create(save_path)
   # 进一步对每个窗口进行筛选
   this_qualified_data<- weather_data%>%
@@ -31,17 +31,19 @@ for (i in seq(begin, end-9, by = step)){
 ########### convert the long data into population matrix ###############################
 #check for the number of years for each route in every state
 #and only keep the route which lasts for 31 years (1997-2022 except2020)
-  combined_data_in_this<-combined_data%>%
-    filter(Year>=Start_Years & Year <= End_Years)
+  combined_data_in_this<-combined_data %>%
+    filter(Year>=Start_Year & Year <= End_Year)
   # 保证剩下的路线质量较高
   # 取至少覆盖80%的年份
+  if (End_Year>=2020  & Start_Year<=2020)window_length = step+1
+  else window_length = step
   selected_routes <- this_qualified_data %>%
     semi_join(combined_data_in_this,by = "RouteDataID")%>%
     # 避免重命名重复列
     group_by(CountryNum,StateNum, Route) %>%
     # 保留覆盖年份80%的路线
     summarise(n.year = n_distinct(Year)) %>%
-    filter(n.year >= (End_Years-Start_Years + 1)*0.8)%>%
+    filter(n.year >= window_length * 0.8)%>%
     arrange(StateNum)
 
   write.csv(selected_routes,paste(save_path,"selected_routes.csv",sep="/"))

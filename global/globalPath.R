@@ -6,9 +6,9 @@ routes_info_with_id_path<-paste(workflow_dir,"route_with_id.csv",sep="/")
 sum_species_path<-paste(workflow_dir,"sum_species.csv",sep="/")
 AOU_name<-"NUSABird/2023Release_Nor/Workflow/name.csv"
 # time moving window
-begin<-1988
+begin<-1967
 end<-2019
-length<-10
+length<-12
 step<-2
 
 top_species<-15
