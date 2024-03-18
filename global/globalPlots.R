@@ -3,6 +3,21 @@ library(ggthemes)
 library(ggplot2)
 library(rnaturalearth)
 library(sf)
+plots1_per_img <- 6
+plots1_width<-14
+plots1_height<-12
+plots1_ncol<- 2
+
+plots2_per_img <- 6
+plots2_width<-10
+plots2_height<-12
+plots2_ncol <- 2
+
+plots3_per_img <- 6
+plots3_width<-18
+plots3_height<-16
+plots3_ncol<-2
+
 world_map <-  ne_countries(scale = "medium", returnclass = "sf")%>%
   st_transform(4326)
 theme_custom <-theme_void()+

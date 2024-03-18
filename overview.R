@@ -27,8 +27,17 @@ plot1s_list <- routes_list %>%
       return(total_plot)
   })
 # 将所有图形排列在一张图上
-plot1_grid <- do.call(grid.arrange, c(plot1s_list, ncol = 2)) %>%
-  ggsave(timeline_pic_path,., width = 12, height = 15, units = "in", dpi = 300)
+# plot1_grid <- do.call(grid.arrange, c(plot1s_list, ncol = 2)) %>%
+#   ggsave(timeline_pic_path,., width = 12, height = 15, units = "in", dpi = 300)
+sub_plots1 <- split(plot1s_list, rep(1:ceiling(length(plot1s_list)/plots1_per_img),
+                                     each=plots1_per_img, length.out=length(plot1s_list)))
+
+# 遍历每个子列表,并将子列表中的图形排列在一张图上并保存
+for (i in seq_along(sub_plots1)) {
+  plot1_grid <- do.call(grid.arrange, c(sub_plots1[[i]], ncol = plots1_ncol)) %>%
+  ggsave(paste0(workflow_dir,"/pics/","timewindows", i, ".png"),.,
+         width=plots1_width, height=plots1_height, units = "in", dpi = 300)
+}
 ####################### 查看每个时间窗的路线分布 #######################
 selected_routes_list <- sub_dirs %>%
   set_names(basename(sub_dirs)) %>%
@@ -74,12 +83,22 @@ plot_latlng <- function(df,name) {
 plot_2 <- selected_routes_list %>%
      map2(names(.), ~plot_latlng(.x, .y))
 
-# 将所有图形排列在一张图上
-plot_2 <- do.call(grid.arrange, c(plot_2, ncol = 3))
+# # 将所有图形排列在一张图上
+# plot_2 <- do.call(grid.arrange, c(plot_2, ncol = 3))
+# # 显示最终图形
+# plot_2  %>%
+#   ggsave(paste0(workflow_dir,"/pics/","路线分布.png"),., width = 12, height = 15, units = "in", dpi = 300)
+# 将plots列表分成多个子列表,每个子列表包含8个图形
+sub_plots2 <- split(plot_2, rep(1:ceiling(length(plot_2)/plots2_per_img),
+                                     each=plots2_per_img, length.out=length(plot_2)))
 
-# 显示最终图形
-plot_2  %>%
-  ggsave(paste0(workflow_dir,"/pics/","路线分布.png"),., width = 12, height = 15, units = "in", dpi = 300)
+# 遍历每个子列表,并将子列表中的图形排列在一张图上并保存
+for (i in seq_along(sub_plots2)) {
+  plot2_grid <- do.call(grid.arrange, c(sub_plots2[[i]], ncol = plots2_ncol)) %>%
+  ggsave(paste0(workflow_dir,"/pics/","routes", i, ".png"),.,
+         width=plots2_width, height=plots2_height, units = "in", dpi = 300)
+}
+
 ####################### 查看每个时间窗的物种分布 #######################
 library(openxlsx)
 top_16_path <- paste0(workflow_dir,"/top_16.xlsx")
@@ -109,12 +128,14 @@ plot3s_list <- routes_list %>%
 # 保存工作簿
 saveWorkbook(top_16_workbook, top_16_path, overwrite = TRUE)
 # 将plots列表分成多个子列表,每个子列表包含8个图形
-sub_plots <- split(plot3s_list, rep(1:ceiling(length(plot3s_list)/6), each=6, length.out=length(plot3s_list)))
+sub_plots3 <- split(plot3s_list, rep(1:ceiling(length(plot3s_list)/plots3_per_img),
+                                     each=plots3_per_img, length.out=length(plot3s_list)))
 
 # 遍历每个子列表,并将子列表中的图形排列在一张图上并保存
-for (i in seq_along(sub_plots)) {
-  plot3_grid <- do.call(grid.arrange, c(sub_plots[[i]], ncol = 2)) %>%
-  ggsave(paste0(workflow_dir,"/pics/","物种数", i, ".png"),.,width=15, height=20, units = "in", dpi = 300)
+for (i in seq_along(sub_plots3)) {
+  plot3_grid <- do.call(grid.arrange, c(sub_plots3[[i]], ncol = plots3_ncol)) %>%
+  ggsave(paste0(workflow_dir,"/pics/","species_rank", i, ".png"),.,
+         width=plots3_width, height=plots3_height, units = "in", dpi = 300)
 }
 
 # 获取工作簿中所有工作表名称

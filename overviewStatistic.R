@@ -3,6 +3,7 @@ library(readr)
 library(stats)
 library(purrr)
 library(Hmisc)
+library(zoo)
 # source("NUSABird/2023Release_Nor/Script/globalPlots.R")
 source("NUSABird/2023Release_Nor/Script/global/global.R")
 
@@ -11,24 +12,27 @@ corr_stats<-list()
 ##### 对于每个种群的时间序列，计算出每个种群的平均值和标准差#########
 routes_list %>%
   map2(names(.), function(df, name) {
-    df<-left_join(selected_AOU_number,df,by="AOU")%>%
+    df<-df%>%
+      inner_join(selected_AOU_number,by="AOU")%>%
         select(AOU,RouteID, Year, SpeciesTotal) # 下面的计算只需要这几列
     # 从名称中提取开始年份和结束年份
     start_year <- as.numeric(substr(name, 1, 4))
     end_year <- as.numeric(substr(name, 6, 9))
     all_years <- start_year:end_year
-      # 获取唯一的AOU和RouteID组合
-      # 首先，建立一个去重的AOU和RouteID组合数据框
-   unique_aou_routeid_df <- df %>%
-    select(AOU, RouteID) %>%
-    distinct()
-  # 然后，生成完整的Year序列
-    #############这里需要更改，应该是插值？
-  complete_df <- unique_aou_routeid_df %>%
-    crossing(Year = all_years) %>%
-    left_join(df, by = c("AOU", "RouteID", "Year"), suffix = c("", ".y")) %>%
-    mutate(SpeciesTotal = coalesce(SpeciesTotal, 0)) %>%
-    select(-ends_with(".y"))
+    # 获取唯一的AOU和RouteID组合,生成完整的Year序列
+  complete_df <- df %>%
+    expand(nesting(AOU, RouteID),
+         Year = all_years) %>%
+    left_join(df, by = c("AOU", "RouteID", "Year")) %>%
+    mutate(SpeciesTotal = coalesce(SpeciesTotal, NA))
+    ts_list <- split(complete_df, f = complete_df$AOU) %>%
+     lapply(., function(AOU_df) {
+       split(AOU_df, f = AOU_df$RouteID)%>%
+       lapply(., function(per_AOU_df) {
+          zoo(per_AOU_df$SpeciesTotal, order.by = per_AOU_df$Year)
+    })
+    })
+########################待修改#######################
   #算出所有选中物种在不同的采样点的统计学性质
   stats <- complete_df %>%
   group_by(AOU, RouteID) %>%

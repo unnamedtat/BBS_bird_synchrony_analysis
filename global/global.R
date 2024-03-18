@@ -18,5 +18,6 @@ routes_list <- sub_dirs %>%
   flatten() %>%
     map(~left_join(.x, routes_info_with_id, by = c("CountryNum","StateNum", "Route")))
 
-selected_AOU_number <- read.csv(sum_species_path)["AOU"]%>%
-  top_n(top_species)
+selected_AOU_number <- read.csv(sum_species_path)%>%
+  top_n(top_species,SpeciesTotal)%>%
+  select(AOU)
