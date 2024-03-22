@@ -4,11 +4,12 @@ library(stats)
 library(purrr)
 library(Hmisc)
 library(zoo)
+library(imputeTS)
 # source("NUSABird/2023Release_Nor/Script/globalPlots.R")
 source("NUSABird/2023Release_Nor/Script/global/global.R")
 
-all_stats<-list()
-corr_stats<-list()
+overall_stats<-list()
+overall_corr_stats<-list()
 ##### 对于每个种群的时间序列，计算出每个种群的平均值和标准差#########
 routes_list %>%
   map2(names(.), function(df, name) {
@@ -20,49 +21,73 @@ routes_list %>%
     end_year <- as.numeric(substr(name, 6, 9))
     all_years <- start_year:end_year
     # 获取唯一的AOU和RouteID组合,生成完整的Year序列
-  complete_df <- df %>%
-    expand(nesting(AOU, RouteID),
-         Year = all_years) %>%
-    left_join(df, by = c("AOU", "RouteID", "Year")) %>%
-    mutate(SpeciesTotal = coalesce(SpeciesTotal, NA))
+    complete_df <- df %>%
+      expand(nesting(AOU, RouteID),Year = all_years) %>%
+      left_join(df, by = c("AOU", "RouteID", "Year")) %>%
+      mutate(SpeciesTotal = coalesce(SpeciesTotal, NA))
+    # 将数据按照AOU和RouteID分组，生成时间序列
     ts_list <- split(complete_df, f = complete_df$AOU) %>%
-     lapply(., function(AOU_df) {
-       split(AOU_df, f = AOU_df$RouteID)%>%
-       lapply(., function(per_AOU_df) {
+      lapply(., function(AOU_df) {
+        split(AOU_df, f = AOU_df$RouteID)%>%
+          lapply(., function(per_AOU_df) {
           zoo(per_AOU_df$SpeciesTotal, order.by = per_AOU_df$Year)
     })
     })
-########################待修改#######################
-  #算出所有选中物种在不同的采样点的统计学性质
-  stats <- complete_df %>%
-  group_by(AOU, RouteID) %>%
-    summarise(
-      mean_SpeciesTotal = mean(SpeciesTotal, na.rm = TRUE),
-      sd_SpeciesTotal = sd(SpeciesTotal, na.rm = TRUE),
-      n = n(),
-      .groups = "drop"
-    )
-  all_stats[[name]]<-stats
-
-   #按AOU字段分割数据框，分别进行两两皮尔逊指数的计算
-  split_AOU_df <- split(complete_df, complete_df$AOU)
-  AOU_Pearson <-  map(split_AOU_df, function(every_AOU){
-   # 首先将数据展宽,每个RouteID对应10列时间序列
-    cor_mat <- every_AOU %>%
-      pivot_wider(names_from = RouteID, values_from = SpeciesTotal,names_prefix = "RouteID")%>%
-      select(-AOU,-Year)%>%
-      as.matrix()%>%
-      rcorr()
-      return(cor_mat)}
-  )
-    corr_stats[[name]]<-AOU_Pearson
+    # 对于每个时间序列，进行缺失值插值，并过滤调质量过差的时间序列
+    filtered_list <- lapply(ts_list, function(every_AOU) {
+      # 计算每个时间序列的缺失值比例
+      na_ratio <- sapply(every_AOU, function(y) mean(is.na(y)))
+      # 过滤掉缺失值比例超过80%的时间序列
+      every_AOU[na_ratio <= 0.2]%>%
+        lapply(., function(y) {
+        # 对缺失值进行插值
+        na_interpolation(y)
       })
+    })
+########################计算总体及种群波动指标#######################
+    # 计算每个时间序列的平均值和标准差
+    all_stats <- filtered_list %>%
+      map2(.,names(.), function(x,AOU) {
+          sum_ts <- Reduce(`+`, x) # 子列表时间序列求和
+          list(mean = mean(sum_ts), sd = sd(sum_ts),AOU=AOU) # 计算平均值和标准差
+      })%>%
+      do.call(rbind, .)
+    #两两计算相关性
+    overall_corr_stats[[name]]<-filtered_list%>%
+    map(., function(x) {
+      ts_names <- names(x)
+      # 获取所有时间序列对的组合
+      combos <- combn(ts_names, 2, simplify = FALSE)
+    cors_test <- t(sapply(combos, function(y) {
+      cor_test_result <- cor.test(x[[y[1]]], x[[y[2]]])
+      c(unname(cor_test_result$statistic),
+        cor_test_result$p.value,
+        cor_test_result$conf.int[2],
+        cor_test_result$conf.int[1],
+        unname(cor_test_result$estimate))
+    }))
+      # 将结果合并为数据框
+      corr_stats <- data.frame(
+        t = cors_test[,1],
+        p_value = cors_test[,2],
+        conf_intervalup = cors_test[,3],
+        conf_intervaldown = cors_test[,4],
+        cor_value = cors_test[,5],
+        routeID1 = unlist(lapply(combos, `[`, 1)),
+        routeID2 = unlist(lapply(combos, `[`, 2))
+      )
+        overall_corr_stats[[name]]<-corr_stats
+    })
+  })
+# 保存整体统计数据
+walk2(overall_corr_stats, names(overall_corr_stats),
+      ~write.csv(.x, file = file.path(paste(workflow_dir, .y, sep = "/"),
+                                      "AOU_Stastic.csv"), row.names = FALSE))
 
-# 将每个表存入文件
-walk2(all_stats, names(all_stats), ~write.csv(.x, file = file.path(paste(workflow_dir, .y, sep = "/"), "AOU_Stastic.csv"), row.names = FALSE))
+
 # 对于每个时间段的相关性系数，算出两两之间的距离
-log10_distance<-routes_info_with_id %>%
-  select(RouteID,Longitude,Latitude)
+# log10_distance<-routes_info_with_id %>%
+#   select(RouteID,Longitude,Latitude)
 # 对于矩阵中显著性大于【】的，参与线性拟合计算。
 
 
