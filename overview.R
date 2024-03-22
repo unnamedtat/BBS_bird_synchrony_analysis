@@ -6,9 +6,9 @@ source("NUSABird/2023Release_Nor/Script/global/global.R")
 # ####################### 种群整体动态 #######################
 # 对每个数据框执行分析和绘图操作
 plot1s_list <- routes_list %>%
-  map2(names(.), function(x, name) {
+  purrr::map2(names(.), function(x, name) {
       total_species <- x %>%
-        group_by(Year) %>%
+        dplyr::group_by(Year) %>%
         summarise(SpeciesTotal = sum(SpeciesTotal))
       min_year <- min(total_species$Year)
       max_year <- max(total_species$Year)
