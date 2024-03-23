@@ -2,7 +2,6 @@ library(stats)
 library(purrr)
 library(zoo)
 library(imputeTS)
-# source("NUSABird/2023Release_Nor/Script/globalPlots.R")
 source("NUSABird/2023Release_Nor/Script/global/global.R")
 
 ##### 对于每个种群的时间序列，计算出每个种群的平均值和标准差#########
