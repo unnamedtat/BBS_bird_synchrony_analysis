@@ -1,7 +1,7 @@
-# library(stats)
-# library(purrr)
-# library(zoo)
-# library(imputeTS)
+library(stats)
+library(purrr)
+library(zoo)
+library(imputeTS)
 # source("NUSABird/2023Release_Nor/Script/globalPlots.R")
 source("NUSABird/2023Release_Nor/Script/global/global.R")
 
@@ -10,14 +10,22 @@ routes_list %>%
   purrr::map2(names(.), function(df, name) {
     df<-df%>%
       dplyr::inner_join(selected_AOU_number,by="AOU")%>%
-        dplyr::select(AOU,RouteID, Year, SpeciesTotal) # 下面的计算只需要这几列
-    # 从名称中提取开始年份和结束年份
+      # dplyr::select(AOU,RouteID, Year, SpeciesTotal)%>% # 下面的计算只需要这几列
+      # ！注意！由于(2000年左右之后)每年同一路线、ID的数据不一定唯一
+      # 因此需要将相同ID的数据合并
+      dplyr::group_by(AOU, RouteID, Year) %>%
+      dplyr::summarise(SpeciesTotal = sum(SpeciesTotal, na.rm = TRUE))
+      # 从名称中提取开始年份和结束年份
     start_year <- as.numeric(substr(name, 1, 4))
+    ###在这里中断
+    if(start_year<1989 || start_year>1997){
+      return(NULL)
+    }
     end_year <- as.numeric(substr(name, 6, 9))
     all_years <- start_year:end_year
     # 获取唯一的AOU和RouteID组合,生成完整的Year序列
     complete_df <- df %>%
-      tidyr::expand(tidyr::nesting(AOU, RouteID),Year = all_years) %>%
+      tidyr::expand(tidyr::nesting("AOU", "RouteID"),Year = all_years) %>%
       dplyr::left_join(df, by = c("AOU", "RouteID", "Year")) %>%
       dplyr::mutate(SpeciesTotal = dplyr::coalesce(SpeciesTotal, NA))
     # 将数据按照AOU和RouteID分组，生成时间序列
@@ -26,6 +34,11 @@ routes_list %>%
         split(AOU_df, f = AOU_df$RouteID)%>%
           lapply(., function(per_AOU_df) {
           zoo::zoo(per_AOU_df$SpeciesTotal, order.by = per_AOU_df$Year)
+          #   withCallingHandlers(
+          #   zoo::zoo(per_AOU_df$SpeciesTotal, order.by = per_AOU_df$Year),
+          #   warning = function(e)
+          #     print(per_AOU_df)
+          #   )
     })
     })
     # 对于每个时间序列，进行缺失值插值，并过滤调质量过差的时间序列
@@ -36,7 +49,7 @@ routes_list %>%
       every_AOU[na_ratio <= 0.2]%>%
         lapply(., function(y) {
         # 对缺失值进行插值
-        imputeTS::na_interpolation(y)
+        imputeTS::na_random(y)###需要确定插值方法
       })
     })
 ########################计算总体及种群波动指标#######################
@@ -77,14 +90,3 @@ routes_list %>%
     save(pairwise_AOU_corr, file = file.path(paste(workflow_dir, name, sep = "/"), "overall_stats.RData"))
     print(paste("Finish", name))
   })
-# 保存整体统计数据
-# walk2(overall_corr_stats, names(overall_corr_stats),
-#       ~write.csv(.x, file = file.path(paste(workflow_dir, .y, sep = "/"),
-#                                       "AOU_Stastic.csv"), row.names = FALSE))
-
-
-# 对于每个时间段的相关性系数，算出两两之间的距离
-# log10_distance<-routes_info_with_id %>%
-#   select(RouteID,Longitude,Latitude)
-# 对于矩阵中显著性大于【】的，参与线性拟合计算。
-

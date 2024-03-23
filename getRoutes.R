@@ -21,7 +21,8 @@ weather_data<-read.csv(weather_path)
 for (i in seq(begin, end-length+1, by = step)){
   Start_Year <- i
   End_Year <- i+length-1
-  save_path=paste(workflow_dir, paste(as.character(Start_Year), as.character(End_Year), sep="-"), sep="/")
+  save_path <- paste(workflow_dir, paste(as.character(Start_Year),
+                                         as.character(End_Year), sep="-"), sep="/")
   dir.create(save_path)
   # 进一步对每个窗口进行筛选
   this_qualified_data<- weather_data%>%
@@ -35,8 +36,8 @@ for (i in seq(begin, end-length+1, by = step)){
     filter(Year>=Start_Year & Year <= End_Year)
   # 保证剩下的路线质量较高
   # 取至少覆盖80%的年份
-  if (End_Year>=2020  & Start_Year<=2020)window_length = length - 1
-  else window_length = length
+  if (End_Year>=2020  & Start_Year<=2020)window_length <- length - 1
+  else window_length <- length
   selected_routes <- this_qualified_data %>%
     semi_join(combined_data_in_this,by = "RouteDataID")%>%
     # 避免重命名重复列

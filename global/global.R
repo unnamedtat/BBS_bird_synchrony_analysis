@@ -1,6 +1,6 @@
-# library(purrr)
-# library(dplyr)
-# library(tidyr)
+library(purrr)
+library(dplyr)
+library(tidyr)
 source("NUSABird/2023Release_Nor/Script/global/globalPath.R")
 #########路径等############
 
@@ -9,7 +9,7 @@ sub_dirs <- list.dirs(workflow_dir, recursive = TRUE, full.names = TRUE)
 #带有routeID的routes
 routes_info_with_id <-read.csv(routes_info_with_id_path)
 
-#每个window的数据
+#每个window的数据，全部记录
 routes_list <- sub_dirs %>%
   set_names(basename(sub_dirs)) %>%  # 使用文件夹名称作为列表名称
   purrr::map(~list.files(., pattern = "selected_total_data.csv", full.names = TRUE)) %>%
