@@ -48,7 +48,8 @@ for (i in seq(begin, end-length+1, by = step)){
     arrange(StateNum)
 
   write.csv(selected_routes,paste(save_path,"selected_routes.csv",sep="/"))
-  selected_records <- semi_join(combined_data_in_this, selected_routes, by = c("CountryNum","StateNum", "Route"))
+  selected_records <- semi_join(combined_data_in_this, selected_routes,
+                                by = c("CountryNum","StateNum", "Route"))
   write.csv(selected_records, paste(save_path,"selected_total_data.csv",sep="/"))
 }
 ###########取全年的优势种，直接把质量达标的统计起来求和，差别不大##########################
@@ -62,7 +63,6 @@ sum_species <- weather_data %>%
 write.csv(sum_species,sum_species_path)
 
 ##########后续重新跑的时候改一下这里的路径,直接用前面的数据即可，不用读取csv#######################
-
 sub_dirs <- list.dirs(workflow_dir, recursive = TRUE, full.names = TRUE)
 # 每个window的数据，全部记录
 routes_list <- sub_dirs %>%

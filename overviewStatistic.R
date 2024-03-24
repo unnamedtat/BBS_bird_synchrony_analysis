@@ -59,7 +59,7 @@ routes_list %>%
         imputeTS::na_ma(y)###用移动加权平均进行插值
       })
     })
-    save(filtered_itp_list, file = filtered_itp_list)
+    save(filtered_itp_list, file = filtered_itp_list_path)
 ########################计算总体及种群波动指标#######################
     # 计算每个时间序列的平均值和标准差
     all_stats <- filtered_itp_list %>%
@@ -76,9 +76,9 @@ routes_list %>%
         purrr::map_dfr(., ~ .x)%>%
         sapply(function(x) round(x, 0))%>%
         Hmisc::rcorr(type = "pearson")
+      # 后面再算一下非线性的时间序列各种性质
     })
-    pairwise_AOU_corr_pearson
-    save(all_stats, file = file.path(paste(workflow_dir, name, sep = "/"), "all_stats.RData"))
+    write.csv(all_stats, file = file.path(paste(workflow_dir, name, sep = "/"), "all_stats.csv"))
     # 保存整体统计数据
     save(pairwise_AOU_corr_pearson, file = file.path(paste(workflow_dir, name, sep = "/"),
                                                     "overall_stats_p.RData"))
