@@ -1,8 +1,8 @@
 ##############画图信息################
-library(ggthemes)
-library(ggplot2)
-library(rnaturalearth)
-library(sf)
+suppressMessages(library(ggthemes))
+suppressMessages(library(ggplot2))
+suppressMessages(library(rnaturalearth))
+suppressMessages(library(sf))
 plots1_per_img <- 6
 plots1_width<-14
 plots1_height<-12
