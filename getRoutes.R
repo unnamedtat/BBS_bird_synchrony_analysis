@@ -67,7 +67,7 @@ write.csv(sum_species,sum_species_path)
 sub_dirs <- list.dirs(workflow_dir, recursive = TRUE, full.names = TRUE)
 # 每个window的数据，全部记录
 routes_list <- sub_dirs %>%
-  rlang::set_names(basename(sub_dirs)) %>%  # 使用文件夹名称作为列表名称
+  rlang::set_names(basename(.)) %>%  # 使用文件夹名称作为列表名称
   purrr::map(~list.files(., pattern = "selected_total_data.csv", full.names = TRUE)) %>%
   Filter(length, .) %>%
   purrr::map(~purrr::map(.x, read.csv)) %>%
