@@ -1,5 +1,6 @@
 suppressMessages(library(dplyr))
 source("NUSABird/2023Release_Nor/Script/global/globalPath.R")
+source("NUSABird/2023Release_Nor/Script/global/globalWindow.R")
 # 为所有路线生成唯一ID
 routes_info <- read.csv(routes_path)
 routes_info_with_id <- routes_info %>%
@@ -44,7 +45,7 @@ for (i in seq(begin, end-length+1, by = step)){
     dplyr::group_by(CountryNum,StateNum, Route) %>%
     # 保留覆盖年份80%的路线
     dplyr::summarise(n.year = n_distinct(Year)) %>%
-    filter(n.year >= window_length * 0.8)%>%
+    filter(n.year >= window_length * cover_percent)%>%
     arrange(StateNum)
 
   write.csv(selected_routes,paste(save_path,"selected_routes.csv",sep="/"))
