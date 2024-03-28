@@ -3,8 +3,9 @@ suppressMessages(library(tseries))
 suppressMessages(library(purrr))
 source("NUSABird/2023Release_Nor/Script/global/globalPath.R")
 
+#############读取数据，并组合##########################
 sub_dirs <- list.dirs(workflow_dir, recursive = TRUE, full.names = TRUE)
-loaded_data_list<- sub_dirs %>%
+prepared_data_list<- sub_dirs %>%
   rlang::set_names(basename(.)) %>%
     purrr::map(., function(dir) {
         file_path <- file.path(dir, "filtered_itp_list.RData")
@@ -16,6 +17,8 @@ loaded_data_list<- sub_dirs %>%
   Filter(length, .)
 
 ########################皮尔逊相关指数#############################
+prepared_data_list %>%
+  purrr::map2(names(.), function(filtered_itp_list, name) {
     pairwise_AOU_corr_pearson <- filtered_itp_list%>%
         purrr::map(., function(every_AOU) {
           # 用Hmisc包中的rcorr函数计算相关系数：皮尔逊指数[线性]
@@ -23,11 +26,11 @@ loaded_data_list<- sub_dirs %>%
             purrr::map_dfr(., ~ .x)%>%
             sapply(function(x) round(x, 0))%>%
             Hmisc::rcorr(type = "pearson")
-          # 后面再算一下非线性的时间序列各种性质
         })
         # 保存整体统计数据
         save(pairwise_AOU_corr_pearson, file = file.path(paste(workflow_dir, name, sep = "/"),
                                                         "overall_stats_p.RData"))
+  })
 ##################################滞后相关性#############################
     #两两计算滞后相关性
     # pairwise_AOU_corr_ccf <- filtered_itp_list%>%
