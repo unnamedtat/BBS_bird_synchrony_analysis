@@ -2,18 +2,11 @@ suppressMessages(library(sf))
 suppressMessages(library(dplyr))
 suppressMessages(library(purrr))
 suppressMessages(library(ggplot2))
-source("NUSABird/2023Release_Nor/Script/global/globalPath.R")
+suppressMessages(library(units))
+source("NUSABird/2023Release_Nor/Script/global/loadRoutesDistance.R")
 
-# 读取数据
-routes_info_with_id <-read.csv(routes_info_with_id_path)
-
-logn_distance <-routes_info_with_id%>%
-  sf::st_as_sf(coords = c("Longitude","Latitude"),crs = 4326) %>%
-  sf::st_distance()%>%
-  log(base = 1000)
-# 一切都是按顺序来的
-rownames(logn_distance) <- colnames(logn_distance) <- 1:nrow(logn_distance)
-#######探究皮尔逊系数的相关性################
+count<-0
+#######探究皮尔逊系数的两两相关性################
 sub_dirs <- list.dirs(workflow_dir, recursive = TRUE, full.names = TRUE)
 for(sub_dir in sub_dirs){
   if (!file.exists(file.path(sub_dir, "overall_stats_p.RData"))) next
@@ -40,24 +33,33 @@ for(sub_dir in sub_dirs){
       #######线性拟合############
       fit_lm <- lm(sig_r_values ~ distance, data = fit_data)
       # 绘制散点图
-      plot(x = fit_data$distance,
-          y = fit_data$sig_r_values,
-          xlab = "Distance",
-          ylab = "Sig_r_values",
-          main = "Scatterplot of Sig_r_values vs Distance")
-      abline(lm(sig_r_values ~ distance, data = fit_data), col = "red")
-      print(summary(fit_lm))
+      p <- ggplot(fit_data) +
+        geom_point(aes(x = distance, y = sig_r_values)) +
+        labs(x = "Distance", y = "r_values", title = "Scatterplot of r_values vs Distance") +
+        geom_abline(aes(intercept = coef(fit_lm)[1], slope = coef(fit_lm)[2]), color = "red")
+      ggsave(paste0(workflow_dir, "/pics/all_fit/", count, ".png"), p,
+              width = 10, height = 10, units = "in", dpi = 300)
+      # print(summary(fit_lm))
       ###########两两绘制空间相关性####################
       draw_data <- fit_data %>%
-        filter(sig_r_values <0.2) %>%
-        dplyr::select(start_x, start_y, end_x, end_y, sig_r_values)
-      ggplot2::ggplot(draw_data) +
+        dplyr::select(start_x, start_y, end_x, end_y, sig_r_values)%>%
+        filter(abs(sig_r_values) >0.5)
+      draw_data$sig_r_values<-abs(draw_data$sig_r_values)
+
+      sp_pic<-ggplot2::ggplot(draw_data) +
         # ggplot2::geom_sf() +  # 绘制基础图层
         ggplot2::geom_segment(aes(x = start_x, y = start_y, xend = end_x, yend = end_y,
                           color = sig_r_values),
                       size = 1) + # 绘制连线,根据 sig_r_values 着色
         ggplot2::scale_color_gradient(low = "blue", high = "red") + # 设置色带范围
         ggplot2::labs(color = "sig_r_values") # 设置颜色图例标题
+        # print(sp_pic)
+        ggsave(paste0(workflow_dir,"/pics/all_fit_sp/",count,".png"),sp_pic,
+                width = 10, height = 10, units = "in", dpi = 300)
+        count<<-count+1
+        print(count)
+        print(fit_lm$coefficients)
+        return(fit_lm)
     })
 }
 

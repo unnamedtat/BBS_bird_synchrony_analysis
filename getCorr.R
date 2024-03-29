@@ -1,20 +1,7 @@
 suppressMessages(library(Hmisc))
 suppressMessages(library(tseries))
-suppressMessages(library(purrr))
-source("NUSABird/2023Release_Nor/Script/global/globalPath.R")
 
-#############读取数据，并组合##########################
-sub_dirs <- list.dirs(workflow_dir, recursive = TRUE, full.names = TRUE)
-prepared_data_list<- sub_dirs %>%
-  rlang::set_names(basename(.)) %>%
-    purrr::map(., function(dir) {
-        file_path <- file.path(dir, "filtered_itp_list.RData")
-        if (file.exists(file_path)) {
-        load(file_path)
-        filtered_itp_list
-        }
-    })%>%
-  Filter(length, .)
+source("NUSABird/2023Release_Nor/Script/global/loadFIData.R")
 
 ########################皮尔逊相关指数#############################
 prepared_data_list %>%

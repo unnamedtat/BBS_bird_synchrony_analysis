@@ -1,6 +1,6 @@
 suppressMessages(library(dplyr))
 source("NUSABird/2023Release_Nor/Script/global/globalPath.R")
-source("NUSABird/2023Release_Nor/Script/global/globalWindow.R")
+
 # 为所有路线生成唯一ID
 routes_info <- read.csv(routes_path)
 routes_info_with_id <- routes_info %>%

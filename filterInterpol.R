@@ -2,12 +2,11 @@ suppressMessages(library(purrr))
 suppressMessages(library(zoo))
 suppressMessages(library(imputeTS))
 suppressMessages(library(purrr))
-suppressMessages(library(dplyr))
 suppressMessages(library(tidyr))
+suppressMessages(library(dplyr))
 
 source("NUSABird/2023Release_Nor/Script/global/globalPath.R")
 
-# 读取数据
 routes_info_with_id <-read.csv(routes_info_with_id_path)
 load(file = routes_list_path)
 selected_AOU_number<-read.csv(sum_species_path)%>%
