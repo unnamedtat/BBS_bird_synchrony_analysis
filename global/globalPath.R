@@ -1,6 +1,6 @@
 # Description: 参数调整
-use_Workflow<-"total"
-group_by<-"None"
+use_Workflow<-"window" #使用的工作流，total为全年，window为时间窗口
+is_diff<-TRUE #在插值之后是否进行差分
 
 workflow_total_dir<-"NUSABird/2023Release_Nor/Workflow_total"
 workflow_window_dir<-"NUSABird/2023Release_Nor/Workflow_window"
@@ -34,7 +34,9 @@ process_data_dir<-file.path(workflow_dir,"Rdata")
 routes_list_path<-file.path(process_data_dir,"routes_list.RData")
 
 # 出图路径
-picure_dir<-file.path(workflow_dir,"pics")
+if(is_diff){
+  picure_dir<-file.path(workflow_dir,"pics","diff")
+}else{picure_dir<-file.path(workflow_dir,"pics")}
 timeline_pic_path<-file.path(picure_dir,"时间窗口.png")
 # 按bcr分组的出图路径
 bcr_fit_dir <- file.path(picure_dir,"all_bcr_fit")
@@ -42,3 +44,10 @@ bcr_fit_sp_dir <- file.path(picure_dir, "all_bcr_sp_fit")
 # 仅按物种分组的出图路径
 fit_dir <- file.path(picure_dir, "all_fit")
 fit_sp_dir <- file.path(picure_dir, "all_sp_fit")
+filtered_itp_list_diff_basename<-"filtered_itp_list_diff.RData"
+filtered_itp_list_basename<-"filtered_itp_list.RData"
+
+overall_stats_p_basename<-"overall_stats_p.RData"
+diff_overall_stats_p_basename<-"diff_overall_stats_p.RData"
+BCR_inner_cor_p_basename<-"BCR_inner_cor_p.RData"
+diff_BCR_inner_cor_p_basename<-"diff_BCR_inner_cor_p.RData"
