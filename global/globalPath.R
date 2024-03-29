@@ -34,9 +34,7 @@ process_data_dir<-file.path(workflow_dir,"Rdata")
 routes_list_path<-file.path(process_data_dir,"routes_list.RData")
 
 # 出图路径
-if(is_diff){
-  picure_dir<-file.path(workflow_dir,"pics","diff")
-}else{picure_dir<-file.path(workflow_dir,"pics")}
+picure_dir<-file.path(workflow_dir,"pics")
 timeline_pic_path<-file.path(picure_dir,"时间窗口.png")
 # 按bcr分组的出图路径
 bcr_fit_dir <- file.path(picure_dir,"all_bcr_fit")

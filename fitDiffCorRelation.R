@@ -73,40 +73,49 @@ getFlmNetwork <- function(corr_list, fit_lm_path, sp_fit_pic_path) {
   # print(sp_pic)
   ggplot2::ggsave(sp_fit_pic_path, sp_pic, width = 10, height = 10, units = "in", dpi = 300)
   # print(fit_lm$coefficients)
+  path_parts <- strsplit(fit_lm_path, "/")[[1]]
+  pics_idx <- which(path_parts == "pics")
+  desired_part <- paste(path_parts[pics_idx:length(path_parts)], collapse = " ")
+  print(desired_part)
+  print(paste("Finish",desired_part,sep = ":"))
   return(fit_lm)
 }
 # dir.create(bcr_fit_dir, showWarnings = FALSE)
 # dir.create(bcr_fit_sp_dir, showWarnings = FALSE)
 #按分组变量进行拟合
 for(sub_dir in sub_dirs){
-if(is_diff) the_process_data_path<- file.path(sub_dir, diff_BCR_inner_cor_p_basename)
-else  the_process_data_dir<-file.path(sub_dir, BCR_inner_cor_p_basename)
-if (!file.exists(the_process_data_path)) next
-years<-basename(sub_dir)
-dir.create(file.path(bcr_fit_dir,paste0(if(is_diff) "diff_" else "",years)), showWarnings = FALSE)
-dir.create(file.path(bcr_fit_sp_dir,paste0(if(is_diff) "diff_" else "",years)), showWarnings = FALSE)
-load(file = file.path(sub_dir,BCR_inner_cor_p_basename))
-BCR_inner_cor_p %>%
-  purrr::map2(.,names(.),function (AOU_corr_list, AOU){
-    purrr::map2(AOU_corr_list, names(AOU_corr_list), function (AOU_corr_BCR_list, BCR){
-      if (nrow(AOU_corr_BCR_list$P) < 50) return(NULL)
-      getFlmNetwork(AOU_corr_BCR_list,
-                fit_lm_path = file.path(bcr_fit_dir,years, paste0(AOU,"_", BCR,".png")),
-                sp_fit_pic_path = file.path(bcr_fit_sp_dir,years, paste0(AOU,"_", BCR,".png")))
-    })})
+  if(is_diff) the_process_data_path<- file.path(sub_dir, diff_BCR_inner_cor_p_basename)
+  else  the_process_data_dir<-file.path(sub_dir, BCR_inner_cor_p_basename)
+  if (!file.exists(the_process_data_path)) next
+  years<-basename(sub_dir)
+  dir1<-file.path(bcr_fit_dir,paste0(if(is_diff) "diff_" else "",years))
+  dir2<-file.path(bcr_fit_sp_dir,paste0(if(is_diff) "diff_" else "",years))
+  dir.create(dir1, showWarnings = FALSE)
+  dir.create(dir2, showWarnings = FALSE)
+  load(file = file.path(sub_dir,BCR_inner_cor_p_basename))
+  BCR_inner_cor_p %>%
+    purrr::map2(.,names(.),function (AOU_corr_list, AOU){
+      purrr::map2(AOU_corr_list, names(AOU_corr_list), function (AOU_corr_BCR_list, BCR){
+        if (nrow(AOU_corr_BCR_list$P) < 50) return(NULL)
+        getFlmNetwork(AOU_corr_BCR_list,
+                  fit_lm_path = file.path(dir1, paste0(AOU,"_", BCR,".png")),
+                  sp_fit_pic_path = file.path(dir2,paste0(AOU,"_", BCR,".png")))
+      })})
 }
 # dir.create(fit_dir, showWarnings = FALSE)
 # dir.create(fit_sp_dir, showWarnings = FALSE)
 for(sub_dir in sub_dirs){
-if(is_diff) the_process_data_path<- file.path(sub_dir, diff_overall_stats_p_basename)
-else  the_process_data_dir<-file.path(sub_dir, overall_stats_p_basename)
-if (!file.exists(the_process_data_path)) next
-years<-basename(sub_dir)
-dir.create(file.path(fit_dir,paste0(if(is_diff) "diff_" else "",years)), showWarnings = FALSE)
-dir.create(file.path(fit_sp_dir,paste0(if(is_diff) "diff_" else "",years)), showWarnings = FALSE)
-load(file = the_process_data_path)
-pairwise_AOU_corr_pearson%>%
-  purrr::map2(.,names(.),function (AOU_corr_list, AOU){
+  if(is_diff) the_process_data_path<- file.path(sub_dir, diff_overall_stats_p_basename)
+  else  the_process_data_dir<-file.path(sub_dir, overall_stats_p_basename)
+  if (!file.exists(the_process_data_path)) next
+  years<-basename(sub_dir)
+  dir1 <- file.path(fit_dir, paste0(if (is_diff) "diff_" else "", years))
+  dir2 <- file.path(fit_sp_dir, paste0(if (is_diff) "diff_" else "", years))
+  dir.create(dir1, showWarnings = FALSE)
+  dir.create(dir2, showWarnings = FALSE)
+  load(file = the_process_data_path)
+  pairwise_AOU_corr_pearson%>%
+    purrr::map2(.,names(.),function (AOU_corr_list, AOU){
       getFlmNetwork(AOU_corr_list,
                 fit_lm_path = file.path(fit_dir,years, paste0(AOU,".png")),
                 sp_fit_pic_path = file.path(fit_sp_dir,years, paste0(AOU,".png")))
