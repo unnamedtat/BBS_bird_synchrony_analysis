@@ -1,6 +1,6 @@
 # Description: 参数调整
 use_Workflow<-"total" #使用的工作流，total为全年，window为时间窗口
-is_diff<-FALSE #在插值之后是否进行差分
+is_diff<-FALSE #在插值之后是否进行差分，已放弃，不再差分
 
 workflow_total_dir<-"NUSABird/2023Release_Nor/Workflow_total"
 workflow_window_dir<-"NUSABird/2023Release_Nor/Workflow_window"
@@ -49,3 +49,5 @@ overall_stats_p_basename<-"overall_stats_p.RData"
 diff_overall_stats_p_basename<-"diff_overall_stats_p.RData"
 BCR_inner_cor_p_basename<-"BCR_inner_cor_p.RData"
 diff_BCR_inner_cor_p_basename<-"diff_BCR_inner_cor_p.RData"
+
+BCR_bwt_cor_p_basename<-"BCR_bwt_cor_p.RData"
