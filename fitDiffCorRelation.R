@@ -3,6 +3,7 @@ suppressMessages(library(dplyr))
 suppressMessages(library(purrr))
 suppressMessages(library(ggplot2))
 suppressMessages(library(units))
+suppressMessages(library(scales))
 
 source("NUSABird/2023Release_Nor/Script/global/globalPath.R")
 
@@ -12,8 +13,9 @@ routes_info_with_id <-read.csv(routes_info_with_id_path)
 logn_distance <-routes_info_with_id%>%
   sf::st_as_sf(coords = c("Longitude","Latitude"),crs = 4326) %>%
   sf::st_distance()%>%
-  log(base = 10)
-
+  units::drop_units()%>%
+  rescale(to = c(0, 1))
+# %>%log(base = 10)
 # 一切都是按顺序来的
 rownames(logn_distance) <- colnames(logn_distance) <- 1:nrow(logn_distance)
 
@@ -46,13 +48,13 @@ getFlmNetwork <- function(corr_list, fit_lm_path, sp_fit_pic_path) {
     ggplot2::labs(x = "Distance", y = "r_values", title = "r_values vs Distance") +
     ggplot2::geom_abline(aes(intercept = coef(fit_lm)[1], slope = coef(fit_lm)[2]),
                         color = "red")+
-    annotate("text", x = max(fit_data$distance) * 0.85, y = max(fit_data$sig_r_values) * 0.9,
+    annotate("text", x = max(fit_data$distance) * 0.15, y = max(fit_data$sig_r_values) * 0.25,
             label = paste("y =", round(coef(fit_lm)[1], 4),
                           "+", round(coef(fit_lm)[2], 4), "* x"),
             parse = TRUE) +
-    annotate("text", x = max(fit_data$distance) * 0.85, y = max(fit_data$sig_r_values) * 0.8,
-            label = paste("R^2 =", round(summary(fit_lm)$r.squared, 4),
-                          ", P =", round(summary(fit_lm)$coefficients[2, 4], 4)))
+    annotate("text", x = max(fit_data$distance) * 0.15, y = max(fit_data$sig_r_values) * 0.15,
+            label = paste("R^2 =", round(summary(fit_lm)$r.squared, 5),
+                          ", P =", round(summary(fit_lm)$coefficients[2, 4], 8)))
 
   ggplot2::ggsave(fit_lm_path, p, width = 10, height = 10, units = "in", dpi = 300)
   # print(summary(fit_lm))
@@ -82,17 +84,17 @@ getFlmNetwork <- function(corr_list, fit_lm_path, sp_fit_pic_path) {
 }
 # dir.create(bcr_fit_dir, showWarnings = FALSE)
 # dir.create(bcr_fit_sp_dir, showWarnings = FALSE)
-#按分组变量进行拟合
+# 按分组变量进行拟合
 for(sub_dir in sub_dirs){
   if(is_diff) the_process_data_path<- file.path(sub_dir, diff_BCR_inner_cor_p_basename)
-  else  the_process_data_dir<-file.path(sub_dir, BCR_inner_cor_p_basename)
+  else  the_process_data_path<-file.path(sub_dir, BCR_inner_cor_p_basename)
   if (!file.exists(the_process_data_path)) next
   years<-basename(sub_dir)
   dir1<-file.path(bcr_fit_dir,paste0(if(is_diff) "diff_" else "",years))
   dir2<-file.path(bcr_fit_sp_dir,paste0(if(is_diff) "diff_" else "",years))
   dir.create(dir1, showWarnings = FALSE)
   dir.create(dir2, showWarnings = FALSE)
-  load(file = file.path(sub_dir,BCR_inner_cor_p_basename))
+  load(file = the_process_data_path)
   BCR_inner_cor_p %>%
     purrr::map2(.,names(.),function (AOU_corr_list, AOU){
       purrr::map2(AOU_corr_list, names(AOU_corr_list), function (AOU_corr_BCR_list, BCR){
@@ -106,7 +108,7 @@ for(sub_dir in sub_dirs){
 # dir.create(fit_sp_dir, showWarnings = FALSE)
 for(sub_dir in sub_dirs){
   if(is_diff) the_process_data_path<- file.path(sub_dir, diff_overall_stats_p_basename)
-  else  the_process_data_dir<-file.path(sub_dir, overall_stats_p_basename)
+  else  the_process_data_path<-file.path(sub_dir, overall_stats_p_basename)
   if (!file.exists(the_process_data_path)) next
   years<-basename(sub_dir)
   dir1 <- file.path(fit_dir, paste0(if (is_diff) "diff_" else "", years))
@@ -117,7 +119,7 @@ for(sub_dir in sub_dirs){
   pairwise_AOU_corr_pearson%>%
     purrr::map2(.,names(.),function (AOU_corr_list, AOU){
       getFlmNetwork(AOU_corr_list,
-                fit_lm_path = file.path(fit_dir,years, paste0(AOU,".png")),
-                sp_fit_pic_path = file.path(fit_sp_dir,years, paste0(AOU,".png")))
+                fit_lm_path = file.path(dir1, paste0(AOU,".png")),
+                sp_fit_pic_path = file.path(dir2, paste0(AOU,".png")))
     })
 }

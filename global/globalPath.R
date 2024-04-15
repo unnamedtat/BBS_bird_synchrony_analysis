@@ -1,6 +1,6 @@
 # Description: 参数调整
-use_Workflow<-"window" #使用的工作流，total为全年，window为时间窗口
-is_diff<-TRUE #在插值之后是否进行差分
+use_Workflow<-"total" #使用的工作流，total为全年，window为时间窗口
+is_diff<-FALSE #在插值之后是否进行差分
 
 workflow_total_dir<-"NUSABird/2023Release_Nor/Workflow_total"
 workflow_window_dir<-"NUSABird/2023Release_Nor/Workflow_window"

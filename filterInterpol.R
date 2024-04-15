@@ -52,11 +52,11 @@ routes_list %>%
         # 对缺失值进行插值
         itp<-imputeTS::na_ma(y)###用移动加权平均进行插值
         if(is_diff){
-          itp<-diff(itp)
+          itp<-diff(itp, differences = 3, lag = 1, na.pad = FALSE)
         }
-        return(itp)
-        # tr<-tseries::adf.test(t, alternative="stationary") #检验是否平稳序列
+        # tr<-tseries::adf.test(itp, alternative="stationary") #检验是否平稳序列
         # return(tr$p.value)
+        return(itp)
       })
     })
     if(is_diff) save_filename<-file.path(workflow_dir,name,filtered_itp_list_diff_basename)
