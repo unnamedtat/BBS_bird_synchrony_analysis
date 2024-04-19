@@ -13,17 +13,39 @@ prepared_data_list %>%
         # 获取BCR内鸟的总数
         BCR_total<-purrr::map(routes_BCR_groups, function(grid_data) {
           matched_list<-every_AOU[grid_data$RouteID]%>%
-            compact()
+            purrr::compact()
+
           if(length(matched_list)<2)return(NULL)
           z_combined_vec <- do.call(cbind, matched_list)
           rowSums(z_combined_vec)
         }) %>%
-        compact()
+        purrr::compact()
+
         BCR_bwt_cor<-purrr::map_dfr(BCR_total, ~ .x)%>%
-          sapply(function(x) round(x, 0))%>%
-          Hmisc::rcorr(type = "pearson")
+          sapply(function(x) round(x, 0))
+
+        combins <- combn(colnames(BCR_bwt_cor), 2)
+
+        ccf_corr <- apply(combins, 2, FUN =
+          function(x){
+            ccf(BCR_bwt_cor[, x[1]],BCR_bwt_cor[, x[2]], plot = FALSE,
+                                                lag.max = 1)$acf[2]
+          })
+      # # 还要计算相关的两个区域的总数
+      #   BCR_1_sum <- apply(combins, 2, FUN =
+      #     function(x){
+      #       sum(BCR_bwt_cor[, x[1]])
+      #     })
+      #   BCR_2_sum <- apply(combins, 2, FUN =
+      #       function(x){
+      #           sum(BCR_bwt_cor[, x[2]])
+
+# })
+        ccf_corr_with_cb <- t(rbind(combins, ccf_corr))
+        colnames(ccf_corr_with_cb) <- c("BCR_1", "BCR_2", "cor")
+        as.data.frame(ccf_corr_with_cb)
       }
       )
-    save(BCR_bwt_cor_p, file = BCR_bwt_cor_p_basename)
+    save(BCR_bwt_cor_p, file = file.path(workflow_dir,name,BCR_bwt_cor_p_basename))
   }
   )

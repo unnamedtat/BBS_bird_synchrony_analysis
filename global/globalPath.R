@@ -26,6 +26,7 @@ every_top_path <- paste0(workflow_dir, "/every_",top_species,"_top.xlsx")
 states_path<-"NUSABird/2023Release_Nor/States"
 routes_path<-"NUSABird/2023Release_Nor/routes.csv"
 weather_path<-"NUSABird/2023Release_Nor/weather.csv"
+distance_bwt_BCR_path<-"NUSABird/2023Release_Nor/BCR_dist.csv"
 # 保存文件的路径
 routes_info_with_id_path<-file.path(workflow_dir,"route_with_id.csv")
 sum_species_path<-file.path(workflow_dir,"sum_species.csv")
@@ -45,6 +46,7 @@ fit_sp_dir <- file.path(picure_dir, "all_sp_fit")
 filtered_itp_list_diff_basename<-"filtered_itp_list_diff.RData"
 filtered_itp_list_basename<-"filtered_itp_list.RData"
 
+# 保存的文件名
 overall_stats_p_basename<-"overall_stats_p.RData"
 diff_overall_stats_p_basename<-"diff_overall_stats_p.RData"
 BCR_inner_cor_p_basename<-"BCR_inner_cor_p.RData"
