@@ -1,5 +1,6 @@
 suppressMessages(library(zoo))
 suppressMessages(library(purrr))
+
 source("NUSABird/2023Release_Nor/Script/global/loadFIData.R")
 
 routes_info_with_id <-read.csv(routes_info_with_id_path)
@@ -21,28 +22,29 @@ prepared_data_list %>%
         }) %>%
         purrr::compact()
 
-        BCR_bwt_cor<-purrr::map_dfr(BCR_total, ~ .x)%>%
+        # 获取皮尔逊指数
+        BCR_round_df<-purrr::map_dfr(BCR_total, ~ .x)%>%
           sapply(function(x) round(x, 0))
 
-        combins <- combn(colnames(BCR_bwt_cor), 2)
+        combins <- combn(colnames(BCR_round_df), 2)
 
         ccf_corr <- apply(combins, 2, FUN =
           function(x){
-            ccf(BCR_bwt_cor[, x[1]],BCR_bwt_cor[, x[2]], plot = FALSE,
-                                                lag.max = 1)$acf[2]
+            ccf(BCR_round_df[, x[1]], BCR_round_df[, x[2]], plot = FALSE,
+                lag.max = 1)$acf[2]
           })
-      # # 还要计算相关的两个区域的总数
-      #   BCR_1_sum <- apply(combins, 2, FUN =
-      #     function(x){
-      #       sum(BCR_bwt_cor[, x[1]])
-      #     })
-      #   BCR_2_sum <- apply(combins, 2, FUN =
-      #       function(x){
-      #           sum(BCR_bwt_cor[, x[2]])
+      # 还要计算相关的两个区域的总数
+        BCR_sum_1 <- apply(combins, 2, FUN =
+          function(x){
+            sum(BCR_round_df[, x[1]])
+          })
+        BCR_sum_2 <- apply(combins, 2, FUN =
+          function(x){
+            sum(BCR_round_df[, x[2]])
+          })
 
-# })
-        ccf_corr_with_cb <- t(rbind(combins, ccf_corr))
-        colnames(ccf_corr_with_cb) <- c("BCR_1", "BCR_2", "cor")
+        ccf_corr_with_cb <- t(rbind(combins, ccf_corr,BCR_sum_1,BCR_sum_2))
+        colnames(ccf_corr_with_cb) <- c("BCR_1", "BCR_2", "cor","BCR_sum_1","BCR_sum_2")
         as.data.frame(ccf_corr_with_cb)
       }
       )
