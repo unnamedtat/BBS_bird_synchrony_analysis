@@ -1,27 +1,32 @@
 import pandas as pd
-import os
 import arcpy
 
+from globalPath import *
+
 arcpy.env.overwriteOutput = True
-arcpy.env.workspace = os.getenv("TEMP")
-filtered_itp_list_path = '../../Workflow_total/1966-2022/filtered_itp_list'
-save_path = '../../Workflow_total/1966-2022/prepare_for_cube'
-routes_path = os.path.join(save_path,'route_with_id.xlsx')
 
-out_gdb_path = os.path.join(save_path, 'points.gdb')
-if not os.path.exists(out_gdb_path):
-    arcpy.CreateFileGDB_management(out_folder_path=save_path, out_name='points.gdb')
-    print(f'数据库 "{out_gdb_path}" 已创建')
-else:
-    print(f'数据库 "{out_gdb_path}" 已存在')
 
+# 创建文件夹或文件地理数据库
+def create_path(path: str, path_type: str, out_folder_path: str = None):
+    if not os.path.exists(path + out_folder_path if out_folder_path else path):
+        if path_type == "dir":
+            os.makedirs(path)
+        elif path_type == "gdb" and out_folder_path:
+            arcpy.CreateFileGDB_management(out_folder_path=path,
+                                           out_name=out_folder_path)
+        else:
+            raise ValueError("path_type must be 'dir' or 'gdb'")
+        print(f'"{path_type}{save_path}{out_folder_path if out_folder_path else ""}" 已创建')
+    else:
+        print(f'"{path_type}{save_path}{out_folder_path if out_folder_path else ""}" 已存在')
+
+
+create_path(save_path, "dir")
+create_path(save_path, "gdb", "points.gdb")
+create_path(save_path, "gdb", "points_projected.gdb")
+
+arcpy.env.workspace = points_gdb_path
 routes = pd.read_excel(routes_path, sheet_name=0, header=0)
-
-if not os.path.exists(save_path):
-    os.makedirs(save_path)
-    print(f'目录 "{save_path}" 已创建')
-else:
-    print(f'目录 "{save_path}" 已存在')
 
 # 遍历文件夹中的所有xlsx文件
 for file_name in os.listdir(filtered_itp_list_path):
@@ -44,9 +49,9 @@ for file_name in os.listdir(filtered_itp_list_path):
         merged_df = new_df.merge(routes, how='left', on='RouteID')
 
         out_shp_name = "AOU" + os.path.splitext(file_name)[0]
-        out_shp_path = os.path.join(out_gdb_path, out_shp_name)
+        out_shp_path = os.path.join(points_gdb_path, out_shp_name)
         sr = arcpy.SpatialReference(4326)
-        arcpy.CreateFeatureclass_management(out_path=out_gdb_path, out_name=out_shp_name,
+        arcpy.CreateFeatureclass_management(out_path=points_gdb_path, out_name=out_shp_name,
                                             geometry_type="POINT", spatial_reference=sr)
         # 添加字段
         arcpy.AddField_management(out_shp_path, "Latitude", "DOUBLE")
@@ -67,13 +72,13 @@ for file_name in os.listdir(filtered_itp_list_path):
 
         print(f"Created feature class: {out_shp_path}")
 
-        # 投影到所需坐标系 (以下为北美地区常用投影坐标系)
         projected_shp_name = out_shp_name + "_projected"
-        projected_shp_path = os.path.join(out_gdb_path, projected_shp_name)
-        out_coord_system = arcpy.SpatialReference(102039) # USA_Contiguous_Albers_Equal_Area_Conic
+        projected_shp_path = os.path.join(points_gdb_projected_path, projected_shp_name)
+        out_coord_system = arcpy.SpatialReference(102039)  # USA_Contiguous_Albers_Equal_Area_Conic
         # out_coord_system = arcpy.SpatialReference(102008)  # North_America_Equidistant_Conic
         arcpy.Project_management(in_dataset=out_shp_path,
                                  out_dataset=projected_shp_path,
                                  out_coor_system=out_coord_system)
+        arcpy.ConvertTimeField_management(projected_shp_path, "year", "yyyy",
+                                          "year_Converted")
         print(f"Created feature class: {projected_shp_path}")
-
