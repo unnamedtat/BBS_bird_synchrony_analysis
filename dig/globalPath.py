@@ -1,6 +1,5 @@
 import os
 import arcpy
-import sys
 
 work_dir = '../../Workflow_total/1966-2022'
 filtered_itp_list_path = os.path.join(work_dir, 'filtered_itp_list')
@@ -11,10 +10,16 @@ points_gdb_projected_path = os.path.join(preparation_path, 'points_projected.gdb
 
 cube_path = os.path.join(work_dir, 'cube_nc')
 cube_info = os.path.join(cube_path, 'cube_info.log')
+cube_analysis_gdb = os.path.join(work_dir, 'cube_analysis.gdb')
 
 
-# 创建文件夹或文件地理数据库
 def create_path(path: str, path_type: str, out_folder_path: str = None):
+    """
+    创建文件夹或文件地理数据库
+    :param path: str
+    :param path_type: str
+    :param out_folder_path: str|None
+    """
     if not os.path.exists(os.path.join(path, out_folder_path) if out_folder_path else path):
         if path_type == "dir":
             os.makedirs(path)

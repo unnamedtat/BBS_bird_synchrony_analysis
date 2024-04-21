@@ -1,5 +1,6 @@
 import arcpy
 from globalPath import *
+
 def buildCube():
     arcpy.env.workspace = cube_path
     walk = arcpy.da.Walk(points_gdb_projected_path, datatype="FeatureClass")
