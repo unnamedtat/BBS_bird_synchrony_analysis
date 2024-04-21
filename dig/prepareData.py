@@ -5,25 +5,9 @@ from globalPath import *
 
 arcpy.env.overwriteOutput = True
 
-
-# 创建文件夹或文件地理数据库
-def create_path(path: str, path_type: str, out_folder_path: str = None):
-    if not os.path.exists(path + out_folder_path if out_folder_path else path):
-        if path_type == "dir":
-            os.makedirs(path)
-        elif path_type == "gdb" and out_folder_path:
-            arcpy.CreateFileGDB_management(out_folder_path=path,
-                                           out_name=out_folder_path)
-        else:
-            raise ValueError("path_type must be 'dir' or 'gdb'")
-        print(f'"{path_type}{save_path}{out_folder_path if out_folder_path else ""}" 已创建')
-    else:
-        print(f'"{path_type}{save_path}{out_folder_path if out_folder_path else ""}" 已存在')
-
-
-create_path(save_path, "dir")
-create_path(save_path, "gdb", "points.gdb")
-create_path(save_path, "gdb", "points_projected.gdb")
+create_path(preparation_path, "dir")
+create_path(preparation_path, "gdb", "points.gdb")
+create_path(preparation_path, "gdb", "points_projected.gdb")
 
 arcpy.env.workspace = points_gdb_path
 routes = pd.read_excel(routes_path, sheet_name=0, header=0)
