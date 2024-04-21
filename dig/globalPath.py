@@ -10,7 +10,7 @@ points_gdb_path = os.path.join(preparation_path, 'points.gdb')
 points_gdb_projected_path = os.path.join(preparation_path, 'points_projected.gdb')
 
 cube_path = os.path.join(work_dir, 'cube_nc')
-cube_info = os.path.join(cube_path, 'cube_info.txt')
+cube_info = os.path.join(cube_path, 'cube_info.log')
 
 
 # 创建文件夹或文件地理数据库
@@ -27,3 +27,13 @@ def create_path(path: str, path_type: str, out_folder_path: str = None):
     else:
         print(f'"{path_type}{preparation_path}/{out_folder_path if out_folder_path else ""}" 已存在')
 
+
+# Arcgis日志打印到对应文件
+class ArcgisLogger:
+    def __init__(self, logfile):
+        self.logfile = logfile
+        self.logfile = open(cube_info, 'w')
+
+    def logAddMessage(self, message, msgType=0):
+        self.logfile.write(arcpy.GetIDMessage(msgType, message) + "\n")
+        return
