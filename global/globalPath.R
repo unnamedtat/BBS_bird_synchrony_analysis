@@ -6,9 +6,9 @@ workflow_total_dir<-"NUSABird/2023Release_Nor/Workflow_total"
 workflow_window_dir<-"NUSABird/2023Release_Nor/Workflow_window"
 if(use_Workflow=="total"){
   workflow_dir<-workflow_total_dir
-  begin<-1966
+  begin<-1971
   end<-2022
-  length<-57
+  length<-52 # 窗口长度，全年为
   step<-0
   cover_percent<-0.7
 }else {

@@ -46,7 +46,7 @@ routes_list %>%
       lapply(ts_list, function(every_AOU) {
       # 计算每个时间序列的缺失值比例
       na_ratio <- sapply(every_AOU, function(y) mean(is.na(y)))
-      # 过滤掉缺失值比例超过80%的时间序列
+      # 过滤掉缺失值比例超过20%的时间序列
       every_AOU[na_ratio <= 0.2]%>%
         lapply(., function(y) {
         # 对缺失值进行插值
