@@ -22,11 +22,19 @@ if __name__ == '__main__':
 
             new_df = pd.DataFrame(columns=['sum', 'RouteID', 'year'])
 
-            for col in range(1, 58):
+            # !!!!!!!!!!!!!!!!mark一下，这里为了方便写死了年份范围!!!!!!!\
+            # 还有需要看一下为什么列名变了
+            for col in range(1971, 2023):
                 # 将原始数据框中的列值放入新的sum列
                 temp_df = pd.DataFrame({'sum': df[f'{col}'].values,
-                                        'RouteID': df['names(x)'].values, 'year': col + 1965})
+                                        'RouteID': df['names(x)'].values, 'year': col})
                 new_df = pd.concat([new_df, temp_df], ignore_index=True, axis=0)
+            # for col in range(1, 58):
+            #     # 将原始数据框中的列值放入新的sum列
+            #     temp_df = pd.DataFrame({'sum': df[f'{col}'].values,
+            #                             'RouteID': df['names(x)'].values, 'year': col + 1965})
+            #     new_df = pd.concat([new_df, temp_df], ignore_index=True, axis=0)
+
             # 保存为新的Excel文件
             # new_file_name = os.path.splitext(file_name)[0] + '.xlsx'
             # new_file_path = os.path.join(save_path, new_file_name)
