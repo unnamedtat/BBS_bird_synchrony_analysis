@@ -1,7 +1,7 @@
 import os
 import arcpy
 
-work_dir = '../../Workflow_total/1966-2022'
+work_dir = '../../Workflow_total/1971-2022'
 filtered_itp_list_path = os.path.join(work_dir, 'filtered_itp_list')
 preparation_path = os.path.join(work_dir, 'prepare_for_cube')
 routes_path = os.path.join(preparation_path, 'route_with_id.xlsx')

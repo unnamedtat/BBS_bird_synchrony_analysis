@@ -1,6 +1,8 @@
 # BBS 同步性分析脚本
 
-Some data analysis R script
+Some data analysis script
+
+Workflow.R: R scripts for BBS synchrony analysis
 
 # preparation
 - getAOUName.R 用于获取AOU对应的物种名称
@@ -20,3 +22,4 @@ Some data analysis R script
 
 - prepareData 准备时空立方体的数据
 - buildCube 构建时空立方体
+- globalPath 全局路径
