@@ -6,8 +6,11 @@ source("NUSABird/2023Release_Nor/Script/global/globalPath.R")
 
 distance_bwt_BCR <- read.csv(distance_bwt_BCR_path)
 
-
-load("NUSABird/2023Release_Nor/Workflow_total/1966-2022/BCR_bwt_cor_p.RData")
+sub_dirs <- list.dirs(workflow_dir, recursive = TRUE, full.names = TRUE)
+for (sub_dir in sub_dirs){
+  if(!file.exists(file.path(sub_dir,"BCR_bwt_cor_p.RData"))) next
+  load(file.path(sub_dir,"BCR_bwt_cor_p.RData"))
+}
 
 purrr::map(BCR_bwt_cor_p,function(every_AOU) {
   # 对每个物种的相关性结果进行拟合
@@ -22,7 +25,7 @@ purrr::map(BCR_bwt_cor_p,function(every_AOU) {
   dist_cor$BCR_sum_2<- as.integer(dist_cor$BCR_sum_2)
   dist_cor$BCR_sum_dif<-abs(dist_cor$BCR_sum_1-dist_cor$BCR_sum_2)
   dist_cor$cor<- as.numeric(dist_cor$cor)
-  model<-lm(cor ~ LINK_DIST + dist_cor$BCR_sum_dif,data = dist_cor)
+  model<-lm(cor ~ LINK_DIST,data = dist_cor)
   # model<-lm(cor ~ poly(LINK_DIST, 2, raw = TRUE) * poly(BCR_sum_1, 2, raw=TRUE),data = dist_cor)
   # 检查拟合模型的效果
   print(summary(model))

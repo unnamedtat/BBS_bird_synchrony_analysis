@@ -42,7 +42,7 @@ sub_plots1 <- split(plot1s_list, rep(1:ceiling(length(plot1s_list)/plots1_per_im
 # 遍历每个子列表,并将子列表中的图形排列在一张图上并保存
 for (i in seq_along(sub_plots1)) {
   plot1_grid <- do.call(grid.arrange, c(sub_plots1[[i]], ncol = plots1_ncol)) %>%
-  ggplot2::ggsave(paste0(workflow_dir,"/pics/","timewindows", i, ".png"),.,
+  ggplot2::ggsave(paste0(picure_dir,"/timewindows", i, ".png"),.,
           width=plots1_width, height=plots1_height, units = "in", dpi = 300)
 }
 ####################### 查看每个时间窗的路线分布 #######################
@@ -102,7 +102,7 @@ sub_plots2 <- split(plot_2, rep(1:ceiling(length(plot_2)/plots2_per_img),
 # 遍历每个子列表,并将子列表中的图形排列在一张图上并保存
 for (i in seq_along(sub_plots2)) {
   plot2_grid <- do.call(grid.arrange, c(sub_plots2[[i]], ncol = plots2_ncol)) %>%
-  ggplot2::ggsave(paste0(workflow_dir,"/pics/","routes", i, ".png"),.,
+  ggplot2::ggsave(paste0(picure_dir,"/routes", i, ".png"),.,
         width=plots2_width, height=plots2_height, units = "in", dpi = 300)
 }
 
@@ -143,7 +143,7 @@ sub_plots3 <- split(plot3s_list, rep(1:ceiling(length(plot3s_list)/plots3_per_im
 # 遍历每个子列表,并将子列表中的图形排列在一张图上并保存
 for (i in seq_along(sub_plots3)) {
   plot3_grid <- do.call(grid.arrange, c(sub_plots3[[i]], ncol = plots3_ncol)) %>%
-  ggplot2::ggsave(paste0(workflow_dir,"/pics/","species_rank", i, ".png"),.,
+  ggplot2::ggsave(paste0(picure_dir,"/species_rank", i, ".png"),.,
           width=plots3_width, height=plots3_height, units = "in", dpi = 300)
 }
 
