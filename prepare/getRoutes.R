@@ -54,6 +54,7 @@ for (i in seq(begin, end-length+1, by = step)){
   write.csv(selected_records, paste(save_path,"selected_total_data.csv",sep="/"))
 }
 ###########取全年的优势种，直接把质量达标的统计起来求和，差别不大##########################
+# mark！注意可能出现不同时间跨度选取的物种不同的情况
 sum_species <- weather_data %>%
   filter(RunType == "1",RPID==101)%>%
   dplyr::left_join(combined_data)%>%
