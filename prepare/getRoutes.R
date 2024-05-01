@@ -77,4 +77,5 @@ routes_list <- sub_dirs %>%
   purrr::flatten() %>%
     purrr::map(~left_join(.x, routes_info_with_id, by = c("CountryNum","StateNum", "Route")))
 
+if(!dir.exists(process_data_dir)) dir.create(process_data_dir)
 save(routes_list, file = routes_list_path)
