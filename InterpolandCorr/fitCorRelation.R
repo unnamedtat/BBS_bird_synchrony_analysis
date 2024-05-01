@@ -6,6 +6,7 @@ suppressMessages(library(units))
 suppressMessages(library(scales))
 
 source("NUSABird/2023Release_Nor/Script/global/globalPath.R")
+source("NUSABird/2023Release_Nor/Script/global/globalPlots.R")
 
 # 读取数据
 routes_info_with_id <-read.csv(routes_info_with_id_path)
@@ -45,18 +46,21 @@ getFlmNetwork <- function(corr_list, fit_lm_path, sp_fit_pic_path) {
   # 绘制散点图
   p <- ggplot2::ggplot(fit_data) +
     ggplot2::geom_point(aes(x = distance, y = sig_r_values)) +
-    ggplot2::labs(x = "Distance", y = "r_values", title = "r_values vs Distance") +
+    ggplot2::labs(x = "距离", y = "相关性系数", title = "") +
     ggplot2::geom_abline(aes(intercept = coef(fit_lm)[1], slope = coef(fit_lm)[2]),
                         color = "red")+
-    annotate("text", x = max(fit_data$distance) * 0.15, y = max(fit_data$sig_r_values) * 0.25,
+    annotate("text", x = max(fit_data$distance) * 0.85, y = max(fit_data$sig_r_values) * 0.85,
             label = paste("y =", round(coef(fit_lm)[1], 4),
                           "+", round(coef(fit_lm)[2], 4), "* x"),
-            parse = TRUE) +
-    annotate("text", x = max(fit_data$distance) * 0.15, y = max(fit_data$sig_r_values) * 0.15,
+            family="Times New Roman", size = 3) +
+    annotate("text", x = max(fit_data$distance) * 0.85, y = max(fit_data$sig_r_values) * 0.80,
             label = paste("R^2 =", round(summary(fit_lm)$r.squared, 5),
-                          ", P =", round(summary(fit_lm)$coefficients[2, 4], 8)))
+                          ", P =", round(summary(fit_lm)$coefficients[2, 4], 8)),
+            family="Times New Roman", size = 3)+
+    theme_bar
 
-  ggplot2::ggsave(fit_lm_path, p, width = 10, height = 10, units = "in", dpi = 300)
+  ggplot2::ggsave(fit_lm_path, p, width = plots_corr_height, height = plots_corr_height,
+                  units = "in", dpi = 300)
   # print(summary(fit_lm))
   ###########两两绘制空间相关性####################
 

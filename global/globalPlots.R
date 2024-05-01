@@ -18,9 +18,13 @@ plots3_width<-18
 plots3_height<-16
 plots3_ncol<-2
 
+
+plots_corr_width<-10
+plots_corr_height<-6
+
 world_map <-  ne_countries(scale = "medium", returnclass = "sf")%>%
   st_transform(4326)
-theme_custom <-theme_void()+
+theme_geo1 <-theme_void()+
   theme(plot.title = element_text(family = "SimSun", size = 16, face = "bold",hjust = 0.5),
         axis.title = element_text(family = "SimSun", size = 14,hjust = 0.5),
         axis.text.y = element_text(color = "black"),
@@ -44,8 +48,9 @@ theme_bar <-theme_void()+
         axis.text = element_text(family = "Times New Roman", size = 12),
         panel.grid.major.y = element_line(colour = "gray",linetype = "dashed"),
         panel.background = element_rect(fill = "white", colour = "black", linewidth = 1,linetype = "solid"),
-        plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), "in"))+
-        theme(legend.title = element_text(family = "SimSun"))
+        plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), "in"),
+        legend.title = element_text(family = "SimSun")
+    )
 
 fancy_scientific <- function(l) {
      # turn in to character string in scientific notation

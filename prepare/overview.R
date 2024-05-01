@@ -29,7 +29,7 @@ plot1s_list <- routes_list %>%
         # scale_y_continuous(labels = scales::label_scientific(digits = 2))+
         ggplot2::scale_y_continuous(labels = fancy_scientific)+
         ggplot2::labs(x = "年份", y = "观测总数量") +
-        theme_custom+
+        theme_geo1+
         ggplot2::theme(axis.title.y = element_text(angle =90))
       return(total_plot)
   })
