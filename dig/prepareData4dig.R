@@ -1,4 +1,4 @@
-data_path <- "NUSABird/2023Release_Nor/Workflow_total/1971-2022"
+data_path <- "NUSABird/2023Release_Nor/Workflow_window/1971-1988"
 
 load(file.path(data_path, "filtered_itp_list.RData"))
 
