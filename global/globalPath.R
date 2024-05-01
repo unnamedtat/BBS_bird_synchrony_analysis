@@ -1,5 +1,5 @@
 # Description: 参数调整
-use_Workflow<-"total" #使用的工作流，total为全年，window为时间窗口
+use_Workflow<-"window" #使用的工作流，total为全年，window为时间窗口
 is_diff<-FALSE #在插值之后是否进行差分，已放弃，不再差分
 
 # 这里直接写死了读取所有子文件，所以需要留意
@@ -54,3 +54,9 @@ BCR_inner_cor_p_basename<-"BCR_inner_cor_p.RData"
 diff_BCR_inner_cor_p_basename<-"diff_BCR_inner_cor_p.RData"
 
 BCR_bwt_cor_p_basename<-"BCR_bwt_cor_p.RData"
+
+
+for(dir in list(workflow_dir, process_data_dir, picure_dir,
+                bcr_fit_dir, bcr_fit_sp_dir, fit_dir, fit_sp_dir)){
+    if (!dir.exists(dir)) dir.create(dir)
+}
