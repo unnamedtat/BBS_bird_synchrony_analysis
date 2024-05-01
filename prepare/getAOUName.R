@@ -31,15 +31,10 @@ split_data <- function(x) {
 
 data_list <- lapply(lines, split_data)
 
-# 现在我们需要构造一个数据框来保存这些数据
 df <- do.call(rbind.data.frame, data_list)
-
-# 添加每一列的名称
-
 
 colnames(df) <- c("Seq", "AOU", "English_Common_Name")
                   # "French_Common_Name", "Spanish_Common_Name",
                   # "ORDER", "Family", "Genus", "Species")
 
-# 最后，我们将这个数据框保存为csv文件
 write.csv(df, AOU_name, row.names = FALSE)
