@@ -31,7 +31,7 @@ distance_bwt_BCR_path<-"NUSABird/2023Release_Nor/BCR_dist.csv"
 # 保存文件的路径
 routes_info_with_id_path<-file.path(workflow_dir,"route_with_id.csv")
 sum_species_path<-file.path(workflow_dir,"sum_species.csv")
-AOU_name_path<-file.path(workflow_dir,"name.csv")
+AOU_name_path<-file.path("NUSABird/2023Release_Nor","name.csv")
 process_data_dir<-file.path(workflow_dir,"Rdata")
 routes_list_path<-file.path(process_data_dir,"routes_list.RData")
 

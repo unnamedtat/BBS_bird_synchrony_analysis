@@ -1,8 +1,6 @@
 suppressMessages(library(dplyr))
 source("NUSABird/2023Release_Nor/Script/global/globalPath.R")
 
-# 没有则创建文件夹
-if (!dir.exists(workflow_dir)) dir.create(workflow_dir)
 # 为所有路线生成唯一ID
 routes_info <- read.csv(routes_path)
 routes_info_with_id <- routes_info %>%
@@ -77,5 +75,4 @@ routes_list <- sub_dirs %>%
   purrr::flatten() %>%
     purrr::map(~left_join(.x, routes_info_with_id, by = c("CountryNum","StateNum", "Route")))
 
-if(!dir.exists(process_data_dir)) dir.create(process_data_dir)
 save(routes_list, file = routes_list_path)
