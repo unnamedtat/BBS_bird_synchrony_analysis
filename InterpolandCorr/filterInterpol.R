@@ -28,9 +28,9 @@ routes_list %>%
     ###在这里中断
     end_year <- as.numeric(substr(name, 6, 9))
     all_years <- start_year:end_year
-    # 获取唯一的AOU和RouteID组合,生成完整的Year序列
+    # 对唯一的AOU和RouteID组合,生成完整的Year序列
     complete_df <- df %>%
-      tidyr::expand(tidyr::nesting("AOU", "RouteID"),Year = all_years) %>%
+      tidyr::expand(Year = all_years) %>%
       dplyr::left_join(df, by = c("AOU", "RouteID", "Year")) %>%
       dplyr::mutate(SpeciesTotal = dplyr::coalesce(SpeciesTotal, NA))
     # 将数据按照AOU和RouteID分组，生成时间序列
