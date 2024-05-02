@@ -15,8 +15,8 @@ logn_distance <-routes_info_with_id%>%
   sf::st_as_sf(coords = c("Longitude","Latitude"),crs = 4326) %>%
   sf::st_distance()%>%
   units::drop_units()%>%
-  rescale(to = c(0, 1))
-# %>%log(base = 10)
+  log(base = 10)
+  # %>%rescale(to = c(0, 1))
 # 一切都是按顺序来的
 rownames(logn_distance) <- colnames(logn_distance) <- 1:nrow(logn_distance)
 
@@ -43,23 +43,32 @@ getFlmNetwork <- function(corr_list, fit_lm_path, sp_fit_pic_path) {
                         end_x = xy2_data$Longitude, end_y = xy2_data$Latitude)
   #######线性拟合############
   fit_lm <- lm(sig_r_values ~ distance, data = fit_data)
+
+# 计算注释文本绝对位置
+  x_range <- range(fit_data$distance, na.rm = TRUE)
+  y_range <- range(fit_data$sig_r_values, na.rm = TRUE)
+  x_pos1 <- (x_range[2]-x_range[1]) * 0.15 + x_range[1]
+  y_pos1 <- (y_range[2]-y_range[1]) * 0.15 + y_range[1]
+  x_pos2 <- (x_range[2]-x_range[1]) * 0.15 + x_range[1]
+  y_pos2 <- (y_range[2]-y_range[1]) * 0.25 + y_range[1]
   # 绘制散点图
   p <- ggplot2::ggplot(fit_data) +
     ggplot2::geom_point(aes(x = distance, y = sig_r_values)) +
-    ggplot2::labs(x = "距离", y = "相关性系数", title = "") +
+    ggplot2::labs(x = "距离(log10)", y = "相关性系数", title = "") +
     ggplot2::geom_abline(aes(intercept = coef(fit_lm)[1], slope = coef(fit_lm)[2]),
                         color = "red")+
-    annotate("text", x = max(fit_data$distance) * 0.85, y = max(fit_data$sig_r_values) * 0.85,
+    annotate("text", x = x_pos1, y = y_pos1,
             label = paste("y =", round(coef(fit_lm)[1], 4),
                           "+", round(coef(fit_lm)[2], 4), "* x"),
-            family="Times New Roman", size = 3) +
-    annotate("text", x = max(fit_data$distance) * 0.85, y = max(fit_data$sig_r_values) * 0.80,
+            family="Times New Roman", size = 5) +
+    annotate("text", x = x_pos2, y = y_pos2,
             label = paste("R^2 =", round(summary(fit_lm)$r.squared, 5),
                           ", P =", round(summary(fit_lm)$coefficients[2, 4], 8)),
-            family="Times New Roman", size = 3)+
-    theme_bar
+            family="Times New Roman", size = 5)+
+    theme_bar+
+    theme(plot.background = element_rect(fill = "white"))
 
-  ggplot2::ggsave(fit_lm_path, p, width = plots_corr_height, height = plots_corr_height,
+  ggplot2::ggsave(fit_lm_path, p, width = plots_corr_width, height = plots_corr_height,
                   units = "in", dpi = 300)
   # print(summary(fit_lm))
   ###########两两绘制空间相关性####################

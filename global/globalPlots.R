@@ -18,8 +18,7 @@ plots3_width<-18
 plots3_height<-16
 plots3_ncol<-2
 
-
-plots_corr_width<-10
+plots_corr_width<-12
 plots_corr_height<-6
 
 world_map <-  ne_countries(scale = "medium", returnclass = "sf")%>%
