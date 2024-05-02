@@ -12,8 +12,9 @@ prepared_data_list %>%
     BCR_bwt_cor_p<-filtered_itp_list %>%
       purrr::map(., function(every_AOU) {
         # 获取BCR内鸟的总数
-        BCR_total<-purrr::map(routes_BCR_groups, function(grid_data) {
-          matched_list<-every_AOU[grid_data$RouteID]%>%
+        BCR_total<-purrr::map(routes_BCR_groups, function(bcr_every) {
+          indx_list<-which(names(every_AOU) %in% bcr_every$RouteID)
+          matched_list<-every_AOU[indx_list]%>%
             purrr::compact()
 
           if(length(matched_list)<2)return(NULL)
