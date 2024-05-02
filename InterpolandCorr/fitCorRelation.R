@@ -66,7 +66,7 @@ getFlmNetwork <- function(corr_list, fit_lm_path, sp_fit_pic_path) {
                           ", P =", round(summary(fit_lm)$coefficients[2, 4], 8)),
             family="Times New Roman", size = 5)+
     theme_bar+
-    theme(plot.background = element_rect(fill = "white"))
+    theme(plot.background = element_rect(fill = "white",colour = "transparent"))
 
   ggplot2::ggsave(fit_lm_path, p, width = plots_corr_width, height = plots_corr_height,
                   units = "in", dpi = 300)
