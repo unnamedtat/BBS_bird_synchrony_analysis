@@ -92,8 +92,9 @@ prepared_data_list %>%
     BCR_inner_cor_p<-filtered_itp_list %>%
       purrr::map(., function(every_AOU) {
         # 依次分组找到每个网格的数据
-        purrr::map(routes_BCR_groups, function(grid_data) {
-          matched_list<-every_AOU[grid_data$RouteID]%>%
+        purrr::map(routes_BCR_groups, function(bcr_every) {
+          indx_list<-which(names(every_AOU) %in% bcr_every$RouteID)
+          matched_list<-every_AOU[indx_list]%>%
             compact()
           if(length(matched_list)<2)return(NULL)
             purrr::map_dfr(matched_list, ~ .x)%>%
