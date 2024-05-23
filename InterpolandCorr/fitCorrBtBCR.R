@@ -12,9 +12,10 @@ sub_dirs <- list.dirs(workflow_dir, recursive = TRUE, full.names = TRUE)
 for (sub_dir in sub_dirs){
   if(!file.exists(file.path(sub_dir,BCR_bwt_cor_p_basename))) next
   load(file.path(sub_dir,BCR_bwt_cor_p_basename))
-}
+  saveDir <- file.path(bcr_btw_fit_dir, basename(sub_dir))
+  dir.create(saveDir, showWarnings = FALSE)
 
-purrr::map2(BCR_bwt_cor_p,names(BCR_bwt_cor_p),function(every_AOU, AOU) {
+  purrr::map2(BCR_bwt_cor_p,names(BCR_bwt_cor_p),function(every_AOU, AOU) {
   # 对每个物种的相关性结果进行拟合
   every_AOU$BCR_1 <- as.integer(every_AOU$BCR_1)
   every_AOU$BCR_2 <- as.integer(every_AOU$BCR_2)
@@ -65,6 +66,8 @@ purrr::map2(BCR_bwt_cor_p,names(BCR_bwt_cor_p),function(every_AOU, AOU) {
             family="Times New Roman", size = 5)+
     theme_bar+
     theme(plot.background = element_rect(fill = "white",colour = "transparent"))
-  ggplot2::ggsave(file.path(bcr_btw_fit_dir,paste0(AOU, ".png")), p, width = plots_corr_width, height = plots_corr_height,
+  ggplot2::ggsave(file.path(saveDir,paste0(AOU, ".png")), p, width = plots_corr_width, height = plots_corr_height,
                   units = "in", dpi = 300)
 })
+}
+

@@ -10,4 +10,3 @@ source("NUSABird/2023Release_Nor/Script/InterpolandCorr/getCorrBtBCR.R")
 #拟合相关性指数
 source("NUSABird/2023Release_Nor/Script/InterpolandCorr/fitCorRelation.R")
 source("NUSABird/2023Release_Nor/Script/InterpolandCorr/fitCorrBtBCR.R")
-###!只对total写了一遍循环
